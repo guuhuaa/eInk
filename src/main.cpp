@@ -354,6 +354,10 @@ uint32_t read32(fs::File &f)
   return result;
 }
 
+
+/*
+  获得日期
+*/
 void setupDateTime()
 {
   DateTime.setTimeZone(8);
@@ -364,6 +368,10 @@ void setupDateTime()
   }
 }
 
+
+/*
+  写入二进制图
+*/
 void drawBitmapFromSpiffs_Buffered(const char *filename, int16_t x, int16_t y, bool with_color, bool partial_update, bool overwrite)
 {
   fs::File file;
@@ -572,6 +580,10 @@ void drawBitmapFromSpiffs_Buffered(const char *filename, int16_t x, int16_t y, b
   }
 }
 
+
+/*
+  写入多行数据
+*/
 void DrawMultiLineString(string content, uint16_t x, uint16_t y, uint16_t contentAreaWidthWithMargin, uint16_t lineHeight)
 {
   string ch;
@@ -609,6 +621,10 @@ void DrawMultiLineString(string content, uint16_t x, uint16_t y, uint16_t conten
   }
 }
 
+
+/*
+  展示首次连接配置wifi信息
+*/
 void ShowWiFiSmartConfig()
 {
   display.fillScreen(GxEPD_WHITE);
@@ -627,12 +643,20 @@ void ShowWiFiSmartConfig()
   drawBitmapFromSpiffs_Buffered("smartconfig.bmp", x, y, false, true, false);
 }
 
+
+/*
+  枚举类：页面是日历还是天气
+*/
 enum PageContent : u8_t
 {
   CALENDAR = 0,
   WEATHER = 1
 };
 
+
+/*
+  展示页面头：日期、城市、星期几
+*/
 void ShowPageHeader()
 {
   u8g2Fonts.setFont(u8g2_mfyuanhei_16_gb2312);
@@ -645,6 +669,10 @@ void ShowPageHeader()
   u8g2Fonts.drawUTF8(48, 64 + 24, WEEKDAY_EN[DateTime.getParts().getWeekDay()]);
 }
 
+
+/*
+  展示时间：月和日，中间的部分
+*/
 void ShowCurrentDate()
 {
   String dateInCenter = String(DateTime.getParts().getMonthDay());
@@ -659,6 +687,10 @@ void ShowCurrentDate()
   u8g2Fonts.drawUTF8((DISPLAY_WIDTH - monthWidth) / 2, 340, MONTH_EN[m]);
 }
 
+
+/*
+  展示毒鸡汤
+*/
 void ShowToxicSoul()
 {
   u16_t r = random(ToxicSoulCount);
@@ -668,6 +700,10 @@ void ShowToxicSoul()
   DrawMultiLineString(string(soul), 80, 420, 300, 36);
 }
 
+
+/*
+  展示页面的底部：天气质量情况
+*/
 void ShowWeatherFoot()
 {
   String foot = cw.text;
@@ -681,6 +717,10 @@ void ShowWeatherFoot()
   u8g2Fonts.drawUTF8(88, DISPLAY_HEIGHT - 24, foot.c_str());
 }
 
+
+/*
+  中间位置：展示天气具体情况和日期轮流交换展示
+*/
 void ShowWeatherContent()
 {
 
@@ -738,6 +778,10 @@ void ShowWeatherContent()
   Serial.printf("每天需要的气温宽度:%u\n",u8g2Fonts.getUTF8Width(test.c_str()));
 }
 
+
+/*
+  展示页面
+*/
 void ShowPage(PageContent pageContent)
 {
   // TODO: 应该判断下咋决定是否刷新。例如距离上次请求超过多少小时再请求。
@@ -774,13 +818,12 @@ void ShowPage(PageContent pageContent)
 
     switch (pageContent)
     {
-    case PageContent::CALENDAR:
-      
-      ShowCurrentDate();
-      break;
-    case PageContent::WEATHER:
-      ShowWeatherContent();
-      break;
+      case PageContent::CALENDAR:
+        ShowCurrentDate();
+        break;
+      case PageContent::WEATHER:
+        ShowWeatherContent();
+        break;
     }
 
     ShowToxicSoul();
@@ -794,15 +837,16 @@ void ShowPage(PageContent pageContent)
    */
   switch (pageContent)
   {
-  case PageContent::CALENDAR:
-    drawBitmapFromSpiffs_Buffered(iconFileSmall.c_str(), 48, DISPLAY_HEIGHT - 48, false, true, false);
-    break;
-  case PageContent::WEATHER:
-    drawBitmapFromSpiffs_Buffered(iconFileSmall.c_str(), 48, DISPLAY_HEIGHT - 48, false, true, false);
-    drawBitmapFromSpiffs_Buffered(iconFileBig.c_str(), 88, 140, false, true, false);
-    break;
-  }
+    case PageContent::CALENDAR:
+      drawBitmapFromSpiffs_Buffered(iconFileSmall.c_str(), 48, DISPLAY_HEIGHT - 48, false, true, false);
+      break;
+    case PageContent::WEATHER:
+      drawBitmapFromSpiffs_Buffered(iconFileSmall.c_str(), 48, DISPLAY_HEIGHT - 48, false, true, false);
+      drawBitmapFromSpiffs_Buffered(iconFileBig.c_str(), 88, 140, false, true, false);
+      break;
+    }
 }
+
 
 void setup()
 {
@@ -858,15 +902,21 @@ void setup()
   display.clearScreen();
 }
 
+
+/*
+  不断刷新
+*/
 void loop()
 {
 
-  if (pageIndex > PageContent::WEATHER)
+  // 循环展示
+  if (pageIndex > PageContent::WEATHER) {
     pageIndex = PageContent::CALENDAR;
+  }
 
   ShowPage((PageContent)pageIndex);
 
   pageIndex++;
 
-  delay(1000 * 60 * 10);
+  delay(1000 * 60 * 1);
 }
